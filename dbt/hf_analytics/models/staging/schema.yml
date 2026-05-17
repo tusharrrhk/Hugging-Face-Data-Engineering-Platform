@@ -8,14 +8,14 @@ models:
       - name: model_id
         description: "Unique model identifier (e.g. 'meta-llama/Llama-2-7b')"
         tests:
-          - not_null          # Built-in test: no NULLs allowed
-          - unique            # Built-in test: no duplicates
+          - not_null          
+          - unique            
 
       - name: downloads_count
         description: "Total number of model downloads"
         tests:
           - not_null
-          - dbt_utils.accepted_range:  # From dbt_utils package
+          - dbt_utils.accepted_range:  
               config:
                 min_value: 0
 
@@ -23,26 +23,28 @@ models:
         description: "ML task type"
         tests:
           - accepted_values:
-              values:
-                - 'text-generation'
-                - 'text-classification'
-                - 'token-classification'
-                - 'question-answering'
-                - 'summarization'
-                - 'translation'
-                - 'image-classification'
-                - 'object-detection'
-                - 'image-segmentation'
-                - 'automatic-speech-recognition'
-                - 'audio-classification'
-                - 'text-to-image'
-                - 'image-to-text'
-                - 'sentence-similarity'
-                - 'feature-extraction'
-                - 'fill-mask'
-                - 'zero-shot-classification'
-                - 'reinforcement-learning'
-                - 'robotics'
-                - 'tabular-classification'
+              arguments:
+                values:
+                  - 'text-generation'
+                  - 'text-classification'
+                  - 'token-classification'
+                  - 'question-answering'
+                  - 'summarization'
+                  - 'translation'
+                  - 'image-classification'
+                  - 'object-detection'
+                  - 'image-segmentation'
+                  - 'automatic-speech-recognition'
+                  - 'audio-classification'
+                  - 'text-to-image'
+                  - 'image-to-text'
+                  - 'sentence-similarity'
+                  - 'feature-extraction'
+                  - 'fill-mask'
+                  - 'zero-shot-classification'
+                  - 'reinforcement-learning'
+                  - 'robotics'
+                  - 'tabular-classification'
               config:
-                severity: warn   # Warn (not fail) for unexpected tags
+                severity: warn
+                

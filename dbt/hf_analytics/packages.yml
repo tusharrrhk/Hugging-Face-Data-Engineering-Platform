@@ -1,3 +1,12 @@
 packages:
   - package: dbt-labs/dbt_utils
     version: [">=1.1.0", "<2.0.0"]
+    # Provides: accepted_range, recency, surrogate_key, etc.
+
+  - package: dbt-labs/audit_helper
+    version: [">=0.9.0", "<1.0.0"]
+    # Provides: compare_relations (check if refactoring broke anything)
+
+  - package: calogica/dbt_expectations
+    version: [">=0.9.0", "<1.0.0"]
+    # More advanced test functions (inspired by Great Expectations)

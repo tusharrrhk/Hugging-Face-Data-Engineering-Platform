@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: fact_model_activity
+    description: "One row per model per ingestion day"
+    data_tests:
+      - dbt_utils.recency:
+          arguments:
+            datepart: day
+            field: activity_date
+            interval: 2
+    columns:
+      - name: activity_id
+        data_tests:
+          - not_null
+          - unique
+      - name: model_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_models')
+                field: model_key
+      - name: downloads_count
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+
+  - name: dim_models
+    columns:
+      - name: model_key
+        data_tests:
+          - not_null
+          - unique
+      - name: model_id
+        data_tests:
+          - not_null
+          - unique
+
+  - name: dim_date
+    columns:
+      - name: date_key
+        data_tests:
+          - not_null
+          - unique

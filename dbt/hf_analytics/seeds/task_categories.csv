@@ -1,0 +1,15 @@
+pipeline_tag,display_name,description,is_generative
+text-generation,Text Generation,Generate text from prompts,true
+text-classification,Text Classification,Classify text into categories,false
+token-classification,Named Entity Recognition,Identify entities in text,false
+question-answering,Question Answering,Answer questions from context,false
+summarization,Summarization,Condense long text into summaries,false
+translation,Translation,Translate between languages,false
+image-classification,Image Classification,Classify images into categories,false
+object-detection,Object Detection,Detect objects in images,false
+text-to-image,Text-to-Image,Generate images from text,true
+automatic-speech-recognition,Speech Recognition,Transcribe audio to text,false
+sentence-similarity,Sentence Similarity,Compare semantic similarity,false
+feature-extraction,Embeddings,Extract vector representations,false
+zero-shot-classification,Zero-Shot Classification,Classify without training,false
+reinforcement-learning,Reinforcement Learning,Train agents via rewards,false
