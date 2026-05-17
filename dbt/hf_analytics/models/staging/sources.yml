@@ -1,0 +1,36 @@
+# "Sources" declare where raw data lives (Snowflake RAW schema)
+# This is how dbt knows which tables to read from
+
+version: 2
+
+sources:
+  - name: raw                          # Reference name in dbt
+    database: HF_ANALYTICS             # Snowflake database
+    schema: RAW                        # Snowflake schema
+    description: "Raw data from HuggingFace API via S3"
+    config:
+      freshness:                         # Alert if data is stale
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 48, period: hour}
+      loaded_at_field: ingested_at       # Column to check freshness
+
+    tables:
+      - name: hf_models_raw
+        description: "Raw model metadata from HuggingFace Hub API"
+        columns:
+          - name: raw_data
+            description: "JSON VARIANT containing full API response"
+          - name: ingested_at
+            description: "When this record was loaded into Snowflake"
+          - name: source_file
+            description: "S3 source file path"
+
+      - name: hf_datasets_raw
+        description: "Raw dataset metadata from HuggingFace Hub API"
+        columns:
+          - name: raw_data
+            description: "JSON VARIANT containing full dataset response"
+          - name: ingested_at
+            description: "When this record was loaded into Snowflake"
+          - name: source_file
+            description: "S3 source file path"

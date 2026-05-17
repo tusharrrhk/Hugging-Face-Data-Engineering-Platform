@@ -3,5 +3,5 @@ boto3==1.34.0          # AWS SDK for Python
 python-dotenv==1.0.0   # Load .env files
 pandas==3.0.3
 snowflake-connector-python==3.6.0
-dbt-core==1.7.0
-dbt-snowflake==1.7.0
+dbt-core==1.11.10
+dbt-snowflake==1.8.0

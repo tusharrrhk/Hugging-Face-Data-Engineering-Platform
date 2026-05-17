@@ -1,0 +1,52 @@
+name: 'hf_analytics'
+version: '1.0.0'
+config-version: 2
+
+profile: 'hf_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+# ─── Model Configurations ──────────────────────────────────────
+models:
+  hf_analytics:
+    staging:
+      "+schema": staging          # goes to STAGING schema
+      "+materialized": view       # Staging = views (no storage cost)
+      "+tags": ["staging"]
+
+    intermediate:
+      "+schema": intermediate
+      "+materialized": view
+      "+tags": ["intermediate"]
+
+    marts:
+      "+schema": marts            # Gold layer in MARTS schema
+      "+materialized": table      # Default for everything in marts = table
+      "+tags": ["marts"]
+      
+      # Nesting these inside marts matching your directory structure
+      dim_models:
+        "+materialized": table
+      fact_model_activity:
+        "+materialized": incremental   # Only process new records!
+        "+unique_key": "activity_id"
+
+# ─── Snapshot Config ─────────────────────────────────────────
+snapshots:
+  hf_analytics:
+    "+target_schema": snapshots
+    "+strategy": timestamp
+    "+updated_at": updated_at
+
+# ─── Variable Definitions ─────────────────────────────────────
+vars:
+  min_downloads: 100     # Filter out models with < 100 downloads
+  start_date: '2020-01-01'

@@ -13,4 +13,4 @@ profiles.yml
 
 # OS
 .DS_Store
-*.log
+*.log__pycache__/
