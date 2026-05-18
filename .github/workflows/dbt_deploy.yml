@@ -57,17 +57,21 @@ jobs:
           PYEOF
 
       - name: dbt deps
-        working-directory: dbt/hf_analytics    # ← FIXED: was 'hf_analytics'
+        working-directory: dbt/hf_analytics    
         run: dbt deps
 
+      - name: dbt seed
+        working-directory: dbt/hf_analytics
+        run: dbt seed --target prod --profiles-dir ~/.dbt
+
       - name: dbt Snapshot
-        working-directory: dbt/hf_analytics    # ← FIXED
+        working-directory: dbt/hf_analytics 
         run: dbt snapshot --target prod --profiles-dir ~/.dbt
 
       - name: dbt Run
-        working-directory: dbt/hf_analytics    # ← FIXED
+        working-directory: dbt/hf_analytics 
         run: dbt run --target prod --profiles-dir ~/.dbt
 
       - name: dbt Test
-        working-directory: dbt/hf_analytics    # ← FIXED
+        working-directory: dbt/hf_analytics 
         run: dbt test --target prod --profiles-dir ~/.dbt
