@@ -27,32 +27,15 @@ jobs:
           cd dbt/hf_analytics && dbt deps
 
       - name: Create profiles.yml
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
-          cat > dbt/hf_analytics/profiles.yml << 'EOF'
- hf_analytics:
-   target: dev
-   outputs:
-     dev:
-       type: snowflake
-       account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-       user: "${{ secrets.SNOWFLAKE_USER }}"
-       password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-       role: ACCOUNTADMIN
-       database: HF_ANALYTICS
-       warehouse: COMPUTE_WH
-       schema: STAGING
-       threads: 1
-     prod:
-       type: snowflake
-       account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-       user: "${{ secrets.SNOWFLAKE_USER }}"
-       password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-       role: ACCOUNTADMIN
-       database: HF_ANALYTICS
-       warehouse: COMPUTE_WH
-       schema: STAGING
-       threads: 4
- EOF
+          printf 'hf_analytics:\n  target: dev\n  outputs:\n    dev:\n      type: snowflake\n      account: "%s"\n      user: "%s"\n      password: "%s"\n      role: ACCOUNTADMIN\n      database: HF_ANALYTICS\n      warehouse: COMPUTE_WH\n      schema: STAGING\n      threads: 1\n    prod:\n      type: snowflake\n      account: "%s"\n      user: "%s"\n      password: "%s"\n      role: ACCOUNTADMIN\n      database: HF_ANALYTICS\n      warehouse: COMPUTE_WH\n      schema: STAGING\n      threads: 4\n' \
+            "$SNOWFLAKE_ACCOUNT" "$SNOWFLAKE_USER" "$SNOWFLAKE_PASSWORD" \
+            "$SNOWFLAKE_ACCOUNT" "$SNOWFLAKE_USER" "$SNOWFLAKE_PASSWORD" \
+            > dbt/hf_analytics/profiles.yml
 
       - name: dbt Compile
         working-directory: dbt/hf_analytics
