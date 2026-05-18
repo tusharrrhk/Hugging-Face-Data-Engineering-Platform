@@ -1,7 +1,6 @@
 # .github/workflows/dbt_deploy.yml
 name: dbt Production Deploy
 
-# Trigger: only when PR is merged to main
 on:
   push:
     branches: [main]
@@ -12,12 +11,12 @@ jobs:
   dbt-deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    environment: production   # Requires manual approval in GitHub Settings
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -25,28 +24,44 @@ jobs:
       - name: Install dbt
         run: |
           pip install dbt-core dbt-snowflake
-          cd dbt && dbt deps
+          cd dbt/hf_analytics && dbt deps
 
-      - name: dbt Snapshot (SCD Type 2)
-        working-directory: dbt
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
-        run: dbt snapshot --target prod
+      - name: Create profiles.yml
+        run: |
+          cat > dbt/hf_analytics/profiles.yml << EOF
+          hf_analytics:
+            target: prod
+            outputs:
+              dev:
+                type: snowflake
+                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+                user: "${{ secrets.SNOWFLAKE_USER }}"
+                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+                role: ACCOUNTADMIN
+                database: HF_ANALYTICS
+                warehouse: COMPUTE_WH
+                schema: STAGING
+                threads: 1
+              prod:
+                type: snowflake
+                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+                user: "${{ secrets.SNOWFLAKE_USER }}"
+                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+                role: ACCOUNTADMIN
+                database: HF_ANALYTICS
+                warehouse: COMPUTE_WH
+                schema: STAGING
+                threads: 4
+          EOF
+
+      - name: dbt Snapshot
+        working-directory: dbt/hf_analytics
+        run: dbt snapshot --target prod --profiles-dir .
 
       - name: dbt Run (Production)
-        working-directory: dbt
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
-        run: dbt run --target prod
+        working-directory: dbt/hf_analytics
+        run: dbt run --target prod --profiles-dir .
 
       - name: dbt Test (Production)
-        working-directory: dbt
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
-        run: dbt test --target prod
+        working-directory: dbt/hf_analytics
+        run: dbt test --target prod --profiles-dir .
