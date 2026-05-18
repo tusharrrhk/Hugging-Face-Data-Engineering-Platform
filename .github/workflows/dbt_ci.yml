@@ -1,4 +1,32 @@
-# .github/workflows/dbt_ci.yml  — same fix, dev target
+# .github/workflows/dbt_ci.yml
+name: dbt CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dbt/**'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  dbt-ci:
+    name: dbt Lint and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt
+        run: pip install dbt-snowflake==1.11.0
+
       - name: Create profiles.yml
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -26,3 +54,19 @@
           p.parent.mkdir(exist_ok=True)
           p.write_text(content)
           PYEOF
+
+      - name: dbt deps
+        working-directory: dbt/hf_analytics    
+        run: dbt deps
+
+      - name: dbt compile
+        working-directory: dbt/hf_analytics    
+        run: dbt compile --target dev --profiles-dir ~/.dbt
+
+      - name: dbt run
+        working-directory: dbt/hf_analytics    
+        run: dbt run --target dev --profiles-dir ~/.dbt
+
+      - name: dbt test
+        working-directory: dbt/hf_analytics    
+        run: dbt test --target dev --profiles-dir ~/.dbt

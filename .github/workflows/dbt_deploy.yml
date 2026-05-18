@@ -7,13 +7,17 @@ on:
     paths:
       - 'dbt/**'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # fixes Node.js 20 warning
+
 jobs:
   dbt-deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,7 +27,6 @@ jobs:
       - name: Install dbt
         run: pip install dbt-snowflake==1.11.0
 
-      # ── THIS IS THE FIX — replaces your old profiles.yml step ──────
       - name: Create profiles.yml
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -50,22 +53,21 @@ jobs:
           p = pathlib.Path.home() / ".dbt" / "profiles.yml"
           p.parent.mkdir(exist_ok=True)
           p.write_text(content)
-          print("Written OK")
+          print("profiles.yml written OK")
           PYEOF
-      # ───────────────────────────────────────────────────────────────
 
       - name: dbt deps
-        working-directory: hf_analytics
+        working-directory: dbt/hf_analytics    # ← FIXED: was 'hf_analytics'
         run: dbt deps
 
       - name: dbt Snapshot
-        working-directory: hf_analytics
+        working-directory: dbt/hf_analytics    # ← FIXED
         run: dbt snapshot --target prod --profiles-dir ~/.dbt
 
       - name: dbt Run
-        working-directory: hf_analytics
+        working-directory: dbt/hf_analytics    # ← FIXED
         run: dbt run --target prod --profiles-dir ~/.dbt
 
       - name: dbt Test
-        working-directory: hf_analytics
+        working-directory: dbt/hf_analytics    # ← FIXED
         run: dbt test --target prod --profiles-dir ~/.dbt
