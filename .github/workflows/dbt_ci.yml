@@ -28,50 +28,50 @@ jobs:
 
       - name: Create profiles.yml
         run: |
-          cat > dbt/hf_analytics/profiles.yml << EOF
-          hf_analytics:
-            target: dev
-            outputs:
-              dev:
-                type: snowflake
-                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-                user: "${{ secrets.SNOWFLAKE_USER }}"
-                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-                role: ACCOUNTADMIN
-                database: HF_ANALYTICS
-                warehouse: COMPUTE_WH
-                schema: STAGING
-                threads: 1
-              prod:
-                type: snowflake
-                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-                user: "${{ secrets.SNOWFLAKE_USER }}"
-                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-                role: ACCOUNTADMIN
-                database: HF_ANALYTICS
-                warehouse: COMPUTE_WH
-                schema: STAGING
-                threads: 4
-          EOF
+          cat > dbt/hf_analytics/profiles.yml << 'EOF'
+ hf_analytics:
+   target: dev
+   outputs:
+     dev:
+       type: snowflake
+       account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+       user: "${{ secrets.SNOWFLAKE_USER }}"
+       password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+       role: ACCOUNTADMIN
+       database: HF_ANALYTICS
+       warehouse: COMPUTE_WH
+       schema: STAGING
+       threads: 1
+     prod:
+       type: snowflake
+       account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+       user: "${{ secrets.SNOWFLAKE_USER }}"
+       password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+       role: ACCOUNTADMIN
+       database: HF_ANALYTICS
+       warehouse: COMPUTE_WH
+       schema: STAGING
+       threads: 4
+ EOF
 
       - name: dbt Compile
-        working-directory: dbt/hf_analytics       
+        working-directory: dbt/hf_analytics
         run: dbt compile --target dev --profiles-dir .
 
       - name: dbt Run (dev)
-        working-directory: dbt/hf_analytics       
+        working-directory: dbt/hf_analytics
         run: dbt run --target dev --profiles-dir .
 
       - name: dbt Test
-        working-directory: dbt/hf_analytics       
+        working-directory: dbt/hf_analytics
         run: dbt test --target dev --profiles-dir .
 
       - name: Generate dbt Docs
-        working-directory: dbt/hf_analytics       
+        working-directory: dbt/hf_analytics
         run: dbt docs generate --profiles-dir .
 
       - name: Upload dbt Docs
         uses: actions/upload-artifact@v4
         with:
           name: dbt-docs
-          path: dbt/hf_analytics/target/          
+          path: dbt/hf_analytics/target/
