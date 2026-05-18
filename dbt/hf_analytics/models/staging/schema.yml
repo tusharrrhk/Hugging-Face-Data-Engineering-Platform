@@ -45,6 +45,9 @@ models:
                   - 'reinforcement-learning'
                   - 'robotics'
                   - 'tabular-classification'
+                  - 'text-to-video'        
+                  - 'multimodal'           
+                  - 'audio-text-to-text' 
               config:
                 severity: warn
                 

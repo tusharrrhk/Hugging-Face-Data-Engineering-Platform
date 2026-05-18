@@ -2,7 +2,12 @@
 -- STAGING LAYER — Silver                                      
 
 with source as (
-    select * from {{ source('raw', 'hf_models_raw') }}
+    SELECT *
+    FROM {{ source('raw', 'hf_models_raw') }}
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY raw_data:modelId::varchar(500)   -- ✅ use raw field, not alias
+        ORDER BY ingested_at DESC
+    ) = 1
 ),
 
 parsed as (

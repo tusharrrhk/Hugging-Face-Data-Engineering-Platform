@@ -14,7 +14,7 @@ load_dotenv()  # Load .env file into os.environ
 BUCKET = os.environ["S3_BUCKET_NAME"]
 
 def ingest_models():
-    """Full pipeline: fetch → enrich → upload for models."""
+    """Full pipeline: fetch -> enrich -> upload for models."""
     models = fetch_models(limit=1000)
     models = add_ingestion_metadata(models, source="huggingface_api_models")
     path = upload_to_s3(models, BUCKET, "bronze/hf_models", "hf_models")

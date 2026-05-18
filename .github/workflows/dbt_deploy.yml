@@ -1,0 +1,52 @@
+# .github/workflows/dbt_deploy.yml
+name: dbt Production Deploy
+
+# Trigger: only when PR is merged to main
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dbt/**'
+
+jobs:
+  dbt-deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production   # Requires manual approval in GitHub Settings
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt
+        run: |
+          pip install dbt-core dbt-snowflake
+          cd dbt && dbt deps
+
+      - name: dbt Snapshot (SCD Type 2)
+        working-directory: dbt
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: dbt snapshot --target prod
+
+      - name: dbt Run (Production)
+        working-directory: dbt
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: dbt run --target prod
+
+      - name: dbt Test (Production)
+        working-directory: dbt
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER:    ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD:${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: dbt test --target prod
