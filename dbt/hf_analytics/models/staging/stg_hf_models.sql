@@ -59,3 +59,4 @@ filtered as (
 
 select * from filtered
 -- trigger
+-- trigger
