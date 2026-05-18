@@ -1,44 +1,28 @@
-# .github/workflows/dbt_ci.yml
-
-jobs:
-  dbt-ci:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'      
-
-      - name: Install dbt
-        run: pip install dbt-snowflake==1.11.0
-
-      # ── ADD THIS STEP 
+# .github/workflows/dbt_ci.yml  — same fix, dev target
       - name: Create profiles.yml
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
-          mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << EOF
-          hf_analytics:
+          python - <<'PYEOF'
+          import os, pathlib
+          content = f"""hf_analytics:
             target: dev
             outputs:
               dev:
                 type: snowflake
-                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-                user: ${{ secrets.SNOWFLAKE_USER }}
-                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                account: "{os.environ['SNOWFLAKE_ACCOUNT']}"
+                user: "{os.environ['SNOWFLAKE_USER']}"
+                password: "{os.environ['SNOWFLAKE_PASSWORD']}"
                 role: ACCOUNTADMIN
                 database: HF_ANALYTICS
                 warehouse: COMPUTE_WH
                 schema: STAGING
                 threads: 1
                 client_session_keep_alive: false
-          EOF
-
-      - name: dbt deps
-        working-directory: hf_analytics
-        run: dbt deps
-
-      - name: dbt compile
-        working-directory: hf_analytics
-        run: dbt compile --target dev
+          """
+          p = pathlib.Path.home() / ".dbt" / "profiles.yml"
+          p.parent.mkdir(exist_ok=True)
+          p.write_text(content)
+          PYEOF
