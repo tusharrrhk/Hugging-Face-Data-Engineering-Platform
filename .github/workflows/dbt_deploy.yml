@@ -28,31 +28,31 @@ jobs:
 
       - name: Create profiles.yml
         run: |
-          cat > dbt/hf_analytics/profiles.yml << EOF
-          hf_analytics:
-            target: prod
-            outputs:
-              dev:
-                type: snowflake
-                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-                user: "${{ secrets.SNOWFLAKE_USER }}"
-                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-                role: ACCOUNTADMIN
-                database: HF_ANALYTICS
-                warehouse: COMPUTE_WH
-                schema: STAGING
-                threads: 1
-              prod:
-                type: snowflake
-                account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-                user: "${{ secrets.SNOWFLAKE_USER }}"
-                password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
-                role: ACCOUNTADMIN
-                database: HF_ANALYTICS
-                warehouse: COMPUTE_WH
-                schema: STAGING
-                threads: 4
-          EOF
+          cat > dbt/hf_analytics/profiles.yml << 'EOF'
+hf_analytics:
+  target: prod
+  outputs:
+    dev:
+      type: snowflake
+      account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+      user: "${{ secrets.SNOWFLAKE_USER }}"
+      password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+      role: ACCOUNTADMIN
+      database: HF_ANALYTICS
+      warehouse: COMPUTE_WH
+      schema: STAGING
+      threads: 1
+    prod:
+      type: snowflake
+      account: "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+      user: "${{ secrets.SNOWFLAKE_USER }}"
+      password: "${{ secrets.SNOWFLAKE_PASSWORD }}"
+      role: ACCOUNTADMIN
+      database: HF_ANALYTICS
+      warehouse: COMPUTE_WH
+      schema: STAGING
+      threads: 4
+EOF
 
       - name: dbt Snapshot
         working-directory: dbt/hf_analytics
