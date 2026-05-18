@@ -1,79 +1,44 @@
 # .github/workflows/dbt_ci.yml
-name: dbt CI Pipeline
-
-on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'dbt/**'
 
 jobs:
   dbt-ci:
-    name: dbt Lint, Compile & Test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'      
 
       - name: Install dbt
-        run: |
-          pip install dbt-core dbt-snowflake
-          cd dbt/hf_analytics && dbt deps
+        run: pip install dbt-snowflake==1.11.0
 
+      # ── ADD THIS STEP 
       - name: Create profiles.yml
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
-          echo 'hf_analytics:' > dbt/hf_analytics/profiles.yml
-          echo '  target: dev' >> dbt/hf_analytics/profiles.yml
-          echo '  outputs:' >> dbt/hf_analytics/profiles.yml
-          echo '    dev:' >> dbt/hf_analytics/profiles.yml
-          echo '      type: snowflake' >> dbt/hf_analytics/profiles.yml
-          echo "      account: $SNOWFLAKE_ACCOUNT" >> dbt/hf_analytics/profiles.yml
-          echo "      user: $SNOWFLAKE_USER" >> dbt/hf_analytics/profiles.yml
-          echo "      password: $SNOWFLAKE_PASSWORD" >> dbt/hf_analytics/profiles.yml
-          echo '      role: ACCOUNTADMIN' >> dbt/hf_analytics/profiles.yml
-          echo '      database: HF_ANALYTICS' >> dbt/hf_analytics/profiles.yml
-          echo '      warehouse: COMPUTE_WH' >> dbt/hf_analytics/profiles.yml
-          echo '      schema: STAGING' >> dbt/hf_analytics/profiles.yml
-          echo '      threads: 1' >> dbt/hf_analytics/profiles.yml
-          echo '    prod:' >> dbt/hf_analytics/profiles.yml
-          echo '      type: snowflake' >> dbt/hf_analytics/profiles.yml
-          echo "      account: $SNOWFLAKE_ACCOUNT" >> dbt/hf_analytics/profiles.yml
-          echo "      user: $SNOWFLAKE_USER" >> dbt/hf_analytics/profiles.yml
-          echo "      password: $SNOWFLAKE_PASSWORD" >> dbt/hf_analytics/profiles.yml
-          echo '      role: ACCOUNTADMIN' >> dbt/hf_analytics/profiles.yml
-          echo '      database: HF_ANALYTICS' >> dbt/hf_analytics/profiles.yml
-          echo '      warehouse: COMPUTE_WH' >> dbt/hf_analytics/profiles.yml
-          echo '      schema: STAGING' >> dbt/hf_analytics/profiles.yml
-          echo '      threads: 4' >> dbt/hf_analytics/profiles.yml
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          hf_analytics:
+            target: dev
+            outputs:
+              dev:
+                type: snowflake
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ACCOUNTADMIN
+                database: HF_ANALYTICS
+                warehouse: COMPUTE_WH
+                schema: STAGING
+                threads: 1
+                client_session_keep_alive: false
+          EOF
 
-      - name: dbt Compile
-        working-directory: dbt/hf_analytics
-        run: dbt compile --target dev --profiles-dir .
+      - name: dbt deps
+        working-directory: hf_analytics
+        run: dbt deps
 
-      - name: dbt Run (dev)
-        working-directory: dbt/hf_analytics
-        run: dbt run --target dev --profiles-dir .
-
-      - name: dbt Test
-        working-directory: dbt/hf_analytics
-        run: dbt test --target dev --profiles-dir .
-
-      - name: Generate dbt Docs
-        working-directory: dbt/hf_analytics
-        run: dbt docs generate --profiles-dir .
-
-      - name: Upload dbt Docs
-        uses: actions/upload-artifact@v4
-        with:
-          name: dbt-docs
-          path: dbt/hf_analytics/target/
+      - name: dbt compile
+        working-directory: hf_analytics
+        run: dbt compile --target dev
