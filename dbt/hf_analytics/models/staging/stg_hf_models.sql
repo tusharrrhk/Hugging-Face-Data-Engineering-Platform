@@ -64,3 +64,4 @@ select * from filtered
 -- trigger2
 -- trigger2
 -- trigger2
+-- trigger
