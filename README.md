@@ -9,7 +9,7 @@
 
 ## Overview
 
-This project implements a full end-to-end data engineering and analytics engineering platform built on top of the HuggingFace Hub public API. It ingests live AI model metadata daily, loads it into a cloud data warehouse, and transforms it into a Star Schema for business intelligence using dbt.
+This project implements a full end-to-end data engineering and analytics engineering platform built on top of the HuggingFace Hub public API. It ingests live AI model metadata daily, loads it into Snowflake data warehouse, and transforms it into a Star Schema for business intelligence using dbt.
 
 The pipeline follows a **Medallion Architecture** (Bronze → Silver → Gold) with a **Star Schema** in the Gold layer, orchestrated tested and deployed via **GitHub Actions CI/CD**, and visualized in **Metabase**.
 
