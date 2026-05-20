@@ -434,7 +434,6 @@ dbt source freshness
 - dbt-snowflake 1.11.0
 - Snowflake account (free trial works)
 - AWS account + S3 bucket
-- Docker Desktop (for Airflow via Astro CLI)
 
 ## Usage
 
